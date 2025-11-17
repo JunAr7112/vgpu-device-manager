@@ -69,6 +69,14 @@ func BuildCommand() *cli.Command {
 			Destination: &applyFlags.SelectedConfig,
 			EnvVars:     []string{"VGPU_DM_SELECTED_CONFIG"},
 		},
+		&cli.StringFlag{
+			Name:        "driver-root",
+			Aliases:     []string{"r"},
+			Value:       "/driver-root",
+			Usage:       "Container path where the host NVIDIA driver is mounted",
+			Destination: &applyFlags.DriverRoot,
+			EnvVars:     []string{"VGPU_DM_DRIVER_ROOT"},
+		},
 	}
 
 	return &apply

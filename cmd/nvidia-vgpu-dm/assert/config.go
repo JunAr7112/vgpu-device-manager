@@ -36,7 +36,7 @@ func VGPUConfig(c *Context) error {
 
 	matched := make([]bool, len(gpus))
 	err = WalkSelectedVGPUConfigForEachGPU(c.VGPUConfig, func(vc *v1.VGPUConfigSpec, i int, d types.DeviceID) error {
-		configManager := vgpu.NewNvlibVGPUConfigManager()
+		configManager := vgpu.NewNvlibVGPUConfigManager(c.Flags.DriverRoot)
 		IsVFIOEnabled, err := configManager.IsVFIOEnabled()
 		if err != nil {
 			return fmt.Errorf("error checking if VFIO is enabled: %v", err)

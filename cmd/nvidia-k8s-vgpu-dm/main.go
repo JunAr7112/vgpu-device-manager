@@ -400,6 +400,7 @@ func assertValidConfig(config string) error {
 		"--valid-config",
 		"-f", configFileFlag,
 		"-c", config,
+		"--driver-root", driverRootCtrPathFlag,
 	}
 	cmd := exec.Command(cliName, args...)
 	cmd.Stdout = os.Stdout
@@ -412,6 +413,7 @@ func assertConfig(config string) error {
 		"assert",
 		"-f", configFileFlag,
 		"-c", config,
+		"--driver-root", driverRootCtrPathFlag,
 	}
 	cmd := exec.Command(cliName, args...)
 	cmd.Stdout = os.Stdout
@@ -425,6 +427,7 @@ func applyConfig(config string) error {
 		"apply",
 		"-f", configFileFlag,
 		"-c", config,
+		"--driver-root", driverRootCtrPathFlag,
 	}
 	cmd := exec.Command(cliName, args...)
 	cmd.Stdout = os.Stdout

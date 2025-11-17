@@ -43,6 +43,7 @@ type Flags struct {
 	ConfigFile     string
 	SelectedConfig string
 	ValidConfig    bool
+	DriverRoot     string
 }
 
 // Context containing CLI flags and the selected VGPUConfig to assert
@@ -84,6 +85,14 @@ func BuildCommand() *cli.Command {
 			Usage:       "Only assert that the config file is valid and the selected config is present in it",
 			Destination: &assertFlags.ValidConfig,
 			EnvVars:     []string{"VGPU_DM_VALID_CONFIG"},
+		},
+		&cli.StringFlag{
+			Name:        "driver-root",
+			Aliases:     []string{"r"},
+			Value:       "/driver-root",
+			Usage:       "Container path where the host NVIDIA driver is mounted",
+			Destination: &assertFlags.DriverRoot,
+			EnvVars:     []string{"VGPU_DM_DRIVER_ROOT"},
 		},
 	}
 

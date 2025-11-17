@@ -28,7 +28,7 @@ import (
 // VGPUConfig applies the selected vGPU config to the node
 func VGPUConfig(c *Context) error {
 	return assert.WalkSelectedVGPUConfigForEachGPU(c.VGPUConfig, func(vc *v1.VGPUConfigSpec, i int, d types.DeviceID) error {
-		configManager := vgpu.NewNvlibVGPUConfigManager()
+		configManager := vgpu.NewNvlibVGPUConfigManager(c.Flags.DriverRoot)
 		IsVFIOEnabled, err := configManager.IsVFIOEnabled()
 		if err != nil {
 			return fmt.Errorf("error checking if Ubuntu 24.04: %v", err)

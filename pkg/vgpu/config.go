@@ -17,12 +17,13 @@
 package vgpu
 
 import (
-	"fmt"
-	"strings"
-	"os"
-	"strconv"
 	"bufio"
+	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/NVIDIA/go-nvlib/pkg/nvmdev"
 	"github.com/google/uuid"
@@ -46,14 +47,20 @@ type Manager interface {
 }
 
 type nvlibVGPUConfigManager struct {
-	nvlib nvlib.Interface
+	nvlib      nvlib.Interface
+	driverRoot string
 }
 
 var _ Manager = (*nvlibVGPUConfigManager)(nil)
 
 // NewNvlibVGPUConfigManager returns a new vGPU Config Manager which uses go-nvlib when creating / deleting vGPU devices
-func NewNvlibVGPUConfigManager() Manager {
-	return &nvlibVGPUConfigManager{nvlib.New()}
+// driverRoot is the container path where the host NVIDIA driver is mounted (e.g., "/driver-root")
+// sriov-manage is a bash script; bash should be mounted from host into the container
+func NewNvlibVGPUConfigManager(driverRoot string) Manager {
+	return &nvlibVGPUConfigManager{
+		nvlib:      nvlib.New(),
+		driverRoot: driverRoot,
+	}
 }
 
 func (m *nvlibVGPUConfigManager) GetVGPUConfigforVFIO(gpu int) (types.VGPUConfig, error) {
@@ -118,7 +125,9 @@ func (m *nvlibVGPUConfigManager) SetVGPUConfigforVFIO(gpu int, config types.VGPU
 		return fmt.Errorf("GPU at index %d not found in available NVIDIA devices", gpu)
 	}
 
-	cmd := exec.Command("chroot", "/host", "/run/nvidia/driver/usr/lib/nvidia/sriov-manage", "-e", nvdevice.Address)
+	// sriov-manage is a bash script; bash and libraries should be mounted from host
+	sriovManagePath := filepath.Join(m.driverRoot, "usr/lib/nvidia/sriov-manage")
+	cmd := exec.Command(sriovManagePath, "-e", nvdevice.Address)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("unable to execute sriov-manage: %v, output: %s", err, string(output))
@@ -190,7 +199,7 @@ func (m *nvlibVGPUConfigManager) getVGPUTypeNumberforVFIO(filePath string, vgpuT
 	return 0, fmt.Errorf("vGPU type %s not found in file %s", vgpuTypeName, filePath)
 }
 
-func IsVFIOEnabled() (bool, error) {
+func (m *nvlibVGPUConfigManager) IsVFIOEnabled() (bool, error) {
     // Check if mdev_bus exists and has entries
     mdevBusPath := "/sys/class/mdev_bus"
     
